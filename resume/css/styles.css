@@ -1,0 +1,544 @@
+:root {
+  --bg-studio: #d5d5d0;
+  --ink: #0f0f0e;
+  --ink-soft: #4a4a46;
+  --ink-faint: rgba(15, 15, 14, 0.14);
+  --pill-white: #ffffff;
+  --font-sans: "Helvetica Neue", "Inter", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--bg-studio);
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 70% 42%, #ddddda 0%, #cfcfca 48%, #c3c3bd 100%);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Fixed Fullscreen Studio 3D Stage (Anchored to Right 70% like Mainframe®) */
+#webgl-stage {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  cursor: grab;
+}
+
+#webgl-stage:active {
+  cursor: grabbing;
+}
+
+/* Subtle left studio readability veil on smaller laptops without breaking flat studio gray */
+.studio-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(210, 210, 205, 0.72) 0%, rgba(210, 210, 205, 0.24) 44%, rgba(210, 210, 205, 0) 62%);
+}
+
+/* Minimalist Fixed Top Navbar (1:1 Mainframe® Layout) */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 36px;
+  background: linear-gradient(180deg, rgba(208, 208, 203, 0.85) 0%, rgba(208, 208, 203, 0) 100%);
+  transition: background-color 0.25s ease, backdrop-filter 0.25s ease, border-color 0.25s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.top-nav.is-scrolled {
+  background: rgba(212, 212, 207, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom-color: rgba(15, 15, 14, 0.08);
+}
+
+.brand-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.brand-asterisk {
+  display: inline-block;
+  font-size: 26px;
+  line-height: 1;
+  user-select: none;
+  transition: transform 0.25s ease-out;
+}
+
+.nav-center {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+
+.nav-link {
+  color: var(--ink);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.nav-link:hover {
+  opacity: 0.52;
+}
+
+.nav-comma {
+  margin-right: 7px;
+  color: var(--ink);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.lang-switch {
+  border: 1px solid rgba(15, 15, 14, 0.28);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.lang-switch:hover {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+.cta-underline {
+  color: var(--ink);
+  font-size: 19px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: opacity 0.2s ease;
+}
+
+.cta-underline:hover {
+  opacity: 0.55;
+}
+
+/* Subtle Bottom-Right 3D Drag Hint */
+.drag-hint-pill {
+  position: fixed;
+  right: 32px;
+  bottom: 22px;
+  z-index: 15;
+  pointer-events: none;
+  font-size: 12.5px;
+  color: rgba(15, 15, 14, 0.58);
+  background: rgba(255, 255, 255, 0.46);
+  backdrop-filter: blur(8px);
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 15, 14, 0.08);
+}
+
+/* Left-Aligned Content Column (Pointer-Selective so Right Half Drags 3D Freely!) */
+.editorial-flow {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 36px;
+  pointer-events: none;
+}
+
+.flow-section {
+  pointer-events: auto;
+  max-width: 590px;
+}
+
+/* HERO SECTION (100vh, Exact Mainframe® Proportions) */
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 64px;
+  padding-bottom: 36px;
+}
+
+.blurred-intro {
+  font-size: clamp(17.5px, 1.8vw, 22px);
+  line-height: 1.38;
+  font-weight: 400;
+  color: var(--ink);
+  filter: blur(3.2px);
+  opacity: 0.68;
+  user-select: none;
+  pointer-events: none;
+  margin-bottom: 20px;
+  transition: filter 0.35s ease, opacity 0.35s ease;
+}
+
+.hero-section:hover .blurred-intro {
+  filter: blur(1.4px);
+  opacity: 0.84;
+}
+
+.typewriter-line {
+  font-size: clamp(18.5px, 2.02vw, 24px);
+  line-height: 1.42;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  min-height: 102px;
+  margin-bottom: 24px;
+}
+
+.tw-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.08em;
+  background: var(--ink);
+  vertical-align: -0.15em;
+  margin-left: 3px;
+  animation: blinkCursor 0.95s step-end infinite;
+}
+
+@keyframes blinkCursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Action Pill Buttons (1:1 Mainframe® White Pills + Outline Copy Pill) */
+.pill-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: pillFadeUp 0.45s ease 0.25s forwards;
+}
+
+@keyframes pillFadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.action-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: var(--pill-white);
+  color: var(--ink);
+  border: 1px solid rgba(15, 15, 14, 0.1);
+  border-radius: 999px;
+  font-size: 14.5px;
+  font-weight: 450;
+  padding: 9px 18px;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.16s ease;
+  font-family: inherit;
+}
+
+.action-pill:hover {
+  background: var(--ink);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.outline-copy-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: rgba(255, 255, 255, 0.26);
+  color: var(--ink);
+  border: 1px solid rgba(15, 15, 14, 0.42);
+  border-radius: 999px;
+  font-size: 14px;
+  padding: 9px 18px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.outline-copy-pill:hover {
+  background: var(--ink);
+  color: #ffffff;
+  border-color: var(--ink);
+}
+
+.copy-underline {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* CONTENT SECTIONS (Minimalist Swiss Editorial Rhythm) */
+.content-section {
+  padding: 76px 0;
+  border-top: 1px solid var(--ink-faint);
+}
+
+.sec-kicker {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+}
+
+.sec-heading {
+  font-size: clamp(22px, 2.3vw, 29px);
+  line-height: 1.28;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: 28px;
+}
+
+.entry-block {
+  padding: 22px 0;
+  border-top: 1px solid rgba(15, 15, 14, 0.09);
+}
+
+.entry-block:first-of-type {
+  border-top: none;
+  padding-top: 4px;
+}
+
+.entry-meta {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.entry-org {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.entry-role {
+  font-size: 14.5px;
+  color: var(--ink-soft);
+  margin: 3px 0 12px;
+}
+
+.entry-bullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.entry-bullets li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 14.8px;
+  line-height: 1.62;
+  color: rgba(15, 15, 14, 0.88);
+}
+
+.entry-bullets li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--ink-soft);
+}
+
+/* Horizontal Swipeable Capability Cards ("左右滑动") */
+.swipe-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.swipe-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8px 0 16px;
+}
+
+.swipe-hint {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.swipe-arrows {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.swipe-arrow-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 15, 14, 0.22);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.swipe-arrow-btn:hover {
+  background: var(--ink);
+  color: #ffffff;
+  border-color: var(--ink);
+}
+
+.skills-carousel {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  cursor: grab;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+
+.skills-carousel.is-dragging {
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+  cursor: grabbing;
+}
+
+.skills-carousel:active {
+  cursor: grabbing;
+}
+
+.skills-carousel::-webkit-scrollbar {
+  height: 4px;
+}
+
+.skills-carousel::-webkit-scrollbar-thumb {
+  background: rgba(15, 15, 14, 0.22);
+  border-radius: 999px;
+}
+
+.skill-card {
+  flex: 0 0 248px;
+  scroll-snap-align: start;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(15, 15, 14, 0.1);
+  border-radius: 18px;
+  padding: 20px 20px 22px;
+  backdrop-filter: blur(6px);
+  user-select: none;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.skill-card:hover {
+  background: #ffffff;
+  transform: translateY(-2px);
+}
+
+.skill-num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 14px;
+}
+
+.skill-title {
+  font-size: 16.5px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.skill-desc {
+  font-size: 13.5px;
+  line-height: 1.56;
+  color: var(--ink-soft);
+}
+
+/* Education & PDF Download Footer Section */
+.edu-detail {
+  font-size: 15px;
+  line-height: 1.65;
+  color: rgba(15, 15, 14, 0.86);
+  margin-bottom: 8px;
+}
+
+.pdf-prompt {
+  margin-top: 24px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.pdf-pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 42px;
+}
+
+@media (max-width: 960px) {
+  .top-nav {
+    padding: 16px 20px;
+  }
+  .nav-center {
+    display: none;
+  }
+  .editorial-flow {
+    padding: 0 20px;
+  }
+  .hero-section {
+    justify-content: flex-end;
+    padding-bottom: 44px;
+  }
+  .studio-veil {
+    background: linear-gradient(180deg, rgba(213, 213, 208, 0) 0%, rgba(213, 213, 208, 0) 36%, rgba(213, 213, 208, 0.88) 58%, rgba(213, 213, 208, 0.96) 100%);
+  }
+  .drag-hint-pill {
+    display: none;
+  }
+}
