@@ -24,10 +24,61 @@ from reportlab.lib.units import mm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
+from reportlab.graphics.shapes import Drawing, Rect
+from reportlab.graphics import renderPDF
+from reportlab.graphics.barcode import qr
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, Image as RLImage
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, Image as RLImage, Flowable
 )
 from reportlab.lib.styles import ParagraphStyle
+
+ONLINE_3D_URL = "https://xjiaming644-del.github.io/resume/"
+
+
+class ClickableQRBadge(Flowable):
+    """Vector QR code badge with caption and native PDF clickable URI annotation."""
+
+    def __init__(self, url, width, height):
+        super().__init__()
+        self.url = url
+        self.width = width
+        self.height = height
+
+    def wrap(self, availWidth, availHeight):
+        return self.width, self.height
+
+    def draw(self):
+        c = self.canv
+        c.saveState()
+        # Subtle card border matching ID photo box
+        c.setStrokeColor(colors.HexColor("#E5E7EB"))
+        c.setFillColor(colors.HexColor("#FFFFFF"))
+        c.setLineWidth(0.5)
+        c.rect(0, 0, self.width, self.height, stroke=1, fill=1)
+
+        # Crisp vector QR code in upper square area
+        qr_box = self.width - 1.6 * mm
+        qr_widget = qr.QrCodeWidget(self.url, barLevel="M", barFillColor=colors.HexColor("#111827"), barBorder=1)
+        bounds = qr_widget.getBounds()
+        bw = bounds[2] - bounds[0]
+        bh = bounds[3] - bounds[1]
+        d = Drawing(qr_box, qr_box, transform=[qr_box / bw, 0, 0, qr_box / bh, 0, 0])
+        d.add(qr_widget)
+        qr_x = (self.width - qr_box) / 2.0
+        qr_y = self.height - qr_box - 0.7 * mm
+        renderPDF.draw(d, c, qr_x, qr_y)
+
+        # Micro-caption underneath QR code
+        c.setFillColor(colors.HexColor("#1E3A5F"))
+        c.setFont("MSYH-Bold", 6.5)
+        c.drawCentredString(self.width / 2.0, 3.65 * mm, "扫码 / 点击直达")
+        c.setFillColor(colors.HexColor("#4B5563"))
+        c.setFont("MSYH", 6.1)
+        c.drawCentredString(self.width / 2.0, 1.25 * mm, "3D 交互在线简历")
+
+        # Make entire QR badge directly clickable in PDF viewers
+        c.linkURL(self.url, (0, 0, self.width, self.height), relative=1, thickness=0)
+        c.restoreState()
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FONT_REG_PATH = r"C:\Windows\Fonts\msyh.ttc"
@@ -113,14 +164,26 @@ def build_clean_resume_pdf(out_path, data):
 
     photo_w = 21.5 * mm
     photo_h = 30.1 * mm
-    photo_cell_w = photo_w + 2.5 * mm
+    qr_w = 22.8 * mm
+    qr_gap = 2.4 * mm
+    right_total_w = qr_w + qr_gap + photo_w + 2.0 * mm
+
+    st_link_line = ParagraphStyle(
+        "LinkLine", fontName="MSYH", fontSize=8.45, leading=12.6, textColor=muted, spaceBefore=0.6
+    )
 
     left_head = [
         Paragraph(data["name"], st_name),
         Paragraph(data["target"], st_target),
         Paragraph(data["meta_line1"], st_meta),
         Paragraph(data["meta_line2"], st_meta),
+        Paragraph(
+            f'<b>3D在线简历：</b><link href="{ONLINE_3D_URL}" color="#1E3A5F"><u>{ONLINE_3D_URL}</u></link>（扫码或点击直接跳转）',
+            st_link_line,
+        ),
     ]
+
+    qr_badge = ClickableQRBadge(ONLINE_3D_URL, width=qr_w, height=photo_h)
 
     photo_img = RLImage(PHOTO_PATH, width=photo_w, height=photo_h)
     photo_box = Table([[photo_img]], colWidths=[photo_w], rowHeights=[photo_h])
@@ -134,7 +197,21 @@ def build_clean_resume_pdf(out_path, data):
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
     ]))
 
-    ht = Table([[left_head, photo_box]], colWidths=[avail_w - photo_cell_w, photo_cell_w])
+    right_pair = Table(
+        [[qr_badge, "", photo_box]],
+        colWidths=[qr_w, qr_gap, photo_w],
+        rowHeights=[photo_h],
+    )
+    right_pair.setStyle(TableStyle([
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
+        ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
+    ]))
+
+    ht = Table([[left_head, right_pair]], colWidths=[avail_w - right_total_w, right_total_w])
     ht.setStyle(TableStyle([
         ("VALIGN", (0, 0), (0, 0), "MIDDLE"),
         ("VALIGN", (1, 0), (1, 0), "BOTTOM"),
@@ -444,8 +521,10 @@ if __name__ == "__main__":
         with open(primary_out, "rb") as rf:
             raw = rf.read()
         pages = len(re.findall(rb"/Type\s*/Page\b", raw))
-        print(f"GENERATED: {fname} ({ascii_name}) | {len(raw)//1024}KB | pages={pages}")
+        links = len(re.findall(rb"/URI\s*\(https://xjiaming644-del\.github\.io/resume/\)", raw))
+        print(f"GENERATED: {fname} ({ascii_name}) | {len(raw)//1024}KB | pages={pages} | clickable_links={links}")
         assert pages == 1, f"ERROR: {fname} spilled onto {pages} pages!"
+        assert links >= 2, f"ERROR: {fname} missing clickable URI annotations (found {links})!"
         with open(os.path.join(OUT_DIRS[0], ascii_name), "wb") as af:
             af.write(raw)
         for extra_dir in OUT_DIRS[1:]:
