@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>夏嘉铭® · Jiaming Xia — Interactive 3D Resume</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f0f0e'/%3E%3Ctext x='50%25' y='56%25' text-anchor='middle' dominant-baseline='middle' font-size='40' fill='%23f2f2ee'%3E%E2%9C%B3%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- Fixed Studio-Gray Interactive 3D CRT Engineer Stage -->
+  <canvas id="webgl-stage"></canvas>
+  <div class="studio-veil"></div>
+
+  <!-- Minimalist Top Navbar (Mainframe® Style) -->
+  <header class="top-nav">
+    <a class="brand-wrap" href="#sec-hero">
+      <span id="brand-text">夏嘉铭®</span>
+      <span id="brand-asterisk" class="brand-asterisk">✳︎</span>
+    </a>
+
+    <nav id="nav-center" class="nav-center" aria-label="简历导航"></nav>
+
+    <div class="nav-right">
+      <button id="lang-switch" class="lang-switch" type="button">EN</button>
+      <a id="cta-right" class="cta-underline" href="#sec-edu">下载简历</a>
+    </div>
+  </header>
+
+  <div id="drag-hint" class="drag-hint-pill">⇄ 移动鼠标或按住左右/上下拖拽旋转 3D 角色</div>
+
+  <!-- Left-Aligned Editorial Flow -->
+  <main class="editorial-flow">
+    <section id="sec-hero" class="flow-section hero-section">
+      <div id="blurred-intro" class="blurred-intro"></div>
+      <p id="typewriter-line" class="typewriter-line"></p>
+      <div id="pill-cluster" class="pill-cluster"></div>
+    </section>
+
+    <section id="sec-work" class="flow-section content-section"></section>
+    <section id="sec-projects" class="flow-section content-section"></section>
+    <section id="sec-skills" class="flow-section content-section"></section>
+    <section id="sec-edu" class="flow-section content-section"></section>
+  </main>
+
+  <script src="vendor/three.min.js"></script>
+  <script src="js/resume-data.js"></script>
+  <script src="js/scene3d.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
